@@ -1,0 +1,87 @@
+%\documentclass[journal]{new-aiaa}
+\documentclass[conf]{new-aiaa} %for conference papers
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\usepackage{lipsum}
+\usepackage[version=4]{mhchem}
+\usepackage{placeins}
+\usepackage{siunitx}
+\usepackage{subfig}
+\usepackage{siunitx}
+\usepackage{textcomp}
+\usepackage{longtable,tabularx}
+
+\setlength\LTleft{0pt} 
+
+\title{Online Adaptive Helicopter Control Using Incremental Dual Heuristic Programming}
+
+\author{Bart Helder\footnote{MSc. Student, Control \& Simulation, Faculty of Aerospace Engineering, Delft University of Technology}}
+\affil{Delft University of Technology, The Netherlands}  
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+\input{sec/0_Abstract}
+\end{abstract}
+
+\section*{Nomenclature}
+
+%\noindent(Nomenclature entries should have the units identified)
+
+{\renewcommand\arraystretch{1.0}
+\noindent\begin{longtable*}{@{}l @{\quad=\quad} l@{}}
+% Latin alphabet
+$a_t$               & Action taken based on the information of state $s_t$ \\
+$e_a, e_c$          & Actor and critic error \\
+$F_t, G_t$          & State and control matrix of recursive least squares estimator \\
+$L_A, L_C$          & Actor and critic loss \\ 
+$n, m$              & Number of states, number of actions\\
+$\hat{P}_t$         & Covariance matrix of recursive least squares estimator \\
+$P, Q$              & State-selection and weighting matrices \\
+$p, q, r$           & Aircraft body rotational rates \\
+$r_{t}$             & Reward obtained from transition to state $s_t$ \\
+$s_t, s^r_t$        & State and reference state \\
+$u, v, w$           & Aircraft body velocities \\
+$V(s) $             & State value function \\
+$X_t$               & Combined state and action vector \\ 
+$x, y, z$           & Location of aircraft center of gravity in Earth coordinates \\
+$\gamma$            & Discount factor \\
+$\delta_{col}, \delta_{lon}, \delta_{lat}, \delta_{ped}$ & Helicopter inputs: collective, longitudinal cyclic, lateral cyclic, and pedal \\
+$\epsilon_t$        & Prediction error or innovation \\
+$\eta^{col}, \eta^{lon}$ & Collective and longitudinal learning rates \\
+$\eta_a, \eta_c$    & Actor and critic learning rates \\
+$\Phi_t$            & Parameter matrix of recursive least squares estimator \\
+$\phi, \theta, \psi$ & Aircraft Euler angles: roll, pitch, yaw \\
+$\kappa$            & Recursive least squares forgetting factor \\
+$\lambda_{0_{mr}}, \lambda_{0_{tr}}$ & Main- and tail rotor normalized uniform inflow velocity \\
+$\lambda(s) $       & Critic: state value function derivative \\
+$\lambda(s_t, s_t^r, w_c), \lambda'(s_t, s_t^r, w_{c'})$ & Critic, target critic \\
+$\pi(s)$            & Policy: state to action mapping \\
+$\sigma_w$          & Standard deviation of neural network weight kernel initializer \\
+$\tau$              & Target critic mixing factor \\
+\end{longtable*}}
+
+
+\newpage
+
+\section{Introduction} \label{sec:introduction}
+\input{sec/1_Introduction.tex}
+\section{Reinforcement Learning Framework} \label{sec:framework}
+\input{sec/2_Framework} 
+\section{Controller design} \label{sec:controller}
+\input{sec/3_Controller} 
+\section{Experiment} \label{sec:experiment}
+\input{sec/4_Experiment}
+\section{Results}\label{sec:results}
+\input{sec/5_Results} 
+\section{Conclusion and Recommendations}\label{sec:conclusions}
+\input{sec/6_Conclusion} 
+
+\FloatBarrier
+\bibliography{bibliography}
+
+\end{document}
