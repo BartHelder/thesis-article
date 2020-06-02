@@ -1,9 +1,7 @@
-% n: number of states
-% m: number of actions?
-
+In this section, flight control is reformulated as a reinforcement learning problem. Afterwards, the IDHP framework is described in terms of both architecture and update rules.
 
 \subsection{RL problem formulation} \label{ssec:rlproblem}
-In RL, the interaction between agent and environment is generally modeled as a Markov Decision Process (MDP), and the internal mechanics of the environment are completely hidden from the agent \cite{book:suttonbarto}. In this paper, a modified MDP framework is used where the reward function is a seperate entity whose structure is known to the agent. This formulation is often used in ADP literature \cite{Bertsekas2000, Enns2002, Enns2003a, Enns2003b, Ferrari2004,VanKampen2006}.  
+In RL, the interaction between agent and environment is generally modeled as a Markov Decision Process (MDP), and the internal mechanics of the environment are completely hidden from the agent \cite{book:suttonbarto}. In this paper, a modified MDP framework is used where the reward function is a separate entity whose structure is known to the agent. This formulation is often used in ADP literature \cite{Bertsekas2000, Enns2002, Enns2003a, Enns2003b, Ferrari2004,VanKampen2006}.  
 
 Flight control can be described as the process of minimizing the difference between the actual state of an aircraft $s_t$ and a variable reference $s_t^{r}$. Reformulated as an MDP, this can be described as follows. At each timestep t, the agent chooses an action $a_t$ based on the state $s_t$, reference state $s_t^r$, and the current policy $\pi$, as shown in Eq. \eqref{eq:policy}. The environment then provides a scalar reward $r_{t+1}$ and new state $s_{t+1}$. The goal of the agent is to learn a parameterized, deterministic policy, mapping state to action, that maximizes the cumulative sum of future discounted rewards, also known as the return. The mapping of state to expected return is known as the (state-)value function and is described in Eq. \eqref{eq:return_definition}. Here, the parameter $\gamma \in [0,1]$ is called the discount factor.
 
@@ -18,9 +16,9 @@ In Approximate Dynamic Programming (ADP), the control theory perspective on the 
 
 \subsection{Incremental Dual Heuristic Programming} \label{ssec:idhp}
 
-\begin{figure}[htb]
+\begin{figure}[h!t]
     \centering
-    \includegraphics[width=\textwidth]{fig/2/flowchart.pdf}
+    \includegraphics[width=\textwidth]{fig/2/flowchart.png}
     \caption{Flowchart of the information during a single complete time-step of the IDHP learning framework. Solid lines feed-forward information, while dashed lines indicate feed-back update paths. }
     \label{fig:idhp_flowchart}
 \end{figure}
@@ -32,7 +30,7 @@ The original IDHP algorithm works forward in time, which requires predicting the
 \subsubsection{Actor and critic neural networks} \label{ssec:neuralnetworks}
 In this paper, neural networks are chosen as the function approximator for the actor, critic, and target critic. Specifically, single-hidden-layer fully-connected multi-layered perceptrons (MLPs) are the structure of choice. They are easy to use with RL libraries such as Tensorflow and PyTorch, widely used in RL-for-flight-control literature \cite{Bertsekas2000, Enns2002, Enns2003a, Enns2003b, Ferrari2004, VanKampen2006, Prokhorov1995, Balakrishnan1996, Prokhorov1997, Zhou2016HDP, Zhou2018DHP, Heyer2020}, can theoretically approximate any function arbitrarily well \cite{Hornik1989}, and are differentiable. The critic estimates the partial derivative of the state-value function with respect to the states, while the actor provides a direct mapping between the current state and the action to take. Their structures are shown in Fig. \ref{fig:nn_structure}. The input of both network types is the same: a combination of their respective input states and tracking errors, which are further elaborated on in Section \ref{ssec:controllerdesign}. Both networks use a single hidden layer with ten neurons, using hyperbolic tangent activation functions. The output of the critic and target critic networks consists of a linear output layer with the same dimension as the input. The actor network has a single sigmoid output neuron, corresponding to the required input range of the helicopter model used as explained in Section \ref{ssec:helimodel}.
 
-\begin{figure}[hb]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=\textwidth, trim={0 0 0.4cm 0.4cm}, clip]{fig/2/NNs2.pdf}
     \caption{Structure of the actor and critic neural networks. Both networks have a single hidden layer with ten neurons. }
@@ -40,7 +38,7 @@ In this paper, neural networks are chosen as the function approximator for the a
 \end{figure}
 
 \subsubsection{Target critic}
-A seperate target network as first introduced in \cite{Mnih2015, Lillicrap2015} is often used to stabilize learning in a Deep RL context by decoupling action selection and evaluation. This idea was successfully applied to IDHP in \cite{Heyer2020}, where it was shown that a separate target critic $\lambda'$ with weight vector $w_{c'}$ increased the stability of the learning process at the cost of learning speed. 
+A separate target network as first introduced in \cite{Mnih2015, Lillicrap2015} is often used to stabilize learning in a Deep RL context by decoupling action selection and evaluation. This idea was successfully applied to IDHP in \cite{Heyer2020}, where it was shown that a separate target critic $\lambda'$ with weight vector $w_{c'}$ increased the stability of the learning process at the cost of learning speed. 
 
 \subsubsection{Incremental model} \label{ssec:incrementalrls}
 In contrast to older ADP methods, IDHP uses online estimation of an instantaneous linear model identified through Taylor expansion. Consider a discrete-time, nonlinear system $s_{t+1} = f(s_t, a_t)$. A Taylor expansion of this system around $t_0$ yields Eq. \eqref{eq:system_taylor}. By choosing the operating point to be $t_0 = t-1$, a number of new definitions can be made. 

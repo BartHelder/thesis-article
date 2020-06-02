@@ -1,12 +1,21 @@
-As described before, the experiment consisted of two phases, with three parts in total: the design of a training scenario, a grid search over the best hyperparameters, and the manoeuvres flown by the resulting controller. Although the training scenario design took place first, the resulting parameters came out of the settings found with the grid search. Therefore, this section presents the results of the three different experiment phases presented above in a slightly different order. First, the results of the hyperparameter search are presented. Those hyperparameters with the best performance were then used as a starting point for the training phase. Finally, the controller that was resulted from the training phase was saved, and the two test manoeuvres were performed by starting from the training save point. 
+As described before, the experiment consisted of two phases, with three parts in total: the design of a training scenario, a grid search over the best hyperparameters, and the maneuvers flown by the resulting controller. Although the training scenario design took place first, the resulting parameters came out of the settings found with the grid search. Therefore, this section presents the results of the three different experiment phases described in Section \ref{sec:experiment} in a slightly different order, as shown in Fig. \ref{fig:flowchart_results}. 
+
+\begin{figure}
+    \centering
+    \includegraphics{fig/5/flowchart.pdf}
+    \caption{Flowchart of the steps taken in the design and execution of the experiment, as well as the subsections where these parts are discussed }
+    \label{fig:flowchart_results}
+\end{figure}
+
+First, the results of the hyperparameter search are presented. Those hyperparameters with the best performance were then used as a starting point for the training phase. Finally, the controllers that resulted from the training phase were saved, and the two test maneuvers were performed by starting from the training save point. 
 
 \subsection{Hyperparameter search} \label{ssec:results:training}
-The grid search over the hyperparameters yielded two sets of results. Firstly, the success rate, defined as the percentage of trials that did not end prematurely, is shown in Fig. \ref{fig:training_params_success}. Trials could end prematurely in two ways: either by breaking the performance limits of $\pm90\si{\degree}$ in pitch and roll, or by "parameter explosion", which is numerical overflow of the neural network weights. Secondly, the final performance of the successful runs, measured in RMSE in the final ten seconds of successful trials, is shown in Fig. \ref{fig:training_params_rms}. 
+The grid search over the hyperparameters yielded two sets of results. Firstly, the success rate, defined as the percentage of trials that did not end prematurely, is shown in Fig. \ref{fig:training_params_success}. Trials could end prematurely in two ways: either by breaking the performance limits of $\pm90\si{\degree}$ in pitch and roll, or by "parameter explosion", which is numerical overflow of the neural network weights. Secondly, the final performance of the successful runs is shown in Fig. \ref{fig:training_params_rms}. The performance is measured in RMSE of the tracking error in the final ten seconds of successful trials.
 
 \begin{figure}[th]
     \centering
-    \subfloat[Success rates]{\includegraphics[width=0.45\textwidth]{fig/5/training/params_success.png} \label{fig:training_params_success}}
-    \subfloat[Final performance]{\includegraphics[width=0.45\textwidth]{fig/5/training/params_rms.png} \label{fig:training_params_rms}}
+    \subfloat[Success rates]{\includegraphics[width=0.45\textwidth]{fig/5/training/training_success.pdf} \label{fig:training_params_success}}
+    \subfloat[Final performance]{\includegraphics[width=0.45\textwidth]{fig/5/training/training_rms.pdf} \label{fig:training_params_rms}}
     \caption{Aggregated success rates and final performance of different combinations of training hyperparameters}
 \end{figure}
 
@@ -36,11 +45,11 @@ A sample training episode is shown in Fig. \ref{fig:training_results}. It can be
     \centering
     \subfloat[Tracking performance, control inputs and angular rates]{\includegraphics[width=0.48\textwidth]{fig/5/training/tracking.pdf} \label{fig:training_tracking}}
     \subfloat[Remaining state variables]{\includegraphics[width=0.48\textwidth]{fig/5/training/states.pdf} \label{fig:training_states}}
-    \caption{Results of a sample training run}
+    \caption{Tracking performance and uncontrolled states during a typical training episode, showing stable behavior while following reference signals.}
     \label{fig:training_results}
 \end{figure}
 
-In Fig. \ref{fig:training_weights}, the learned parameters of the online estimated state and input matrices as well as the weights of both the actor and critic are shown. It can be seen that the parameters of both the state and input matrix in the incremental model converge within seconds, providing critical information to the actor and critic updates. 
+In Fig. \ref{fig:training_weights}, the learned parameters of the online estimated state and input matrices as well as the weights of both the actor and critic are shown. The top two plots in each subfigure show the parameters of the RLS model, and it can be seen that the parameters of both the state and input matrix in the incremental model converge within seconds, providing critical information to the actor and critic updates. The parameters of the cyclic converge immediately upon start of the scenario, while the parameters corresponding to the collective only start reacting after eight seconds. This corresponds to the timing of the input excitation signals, which are spaced eight seconds apart, as can be seen in Fig. \ref{fig:training_results}. The bottom two plots in each subfigure show the actor and critic parameters, respectively. Both the cyclic and the collective agents are shown to reach their approximate final weight distributions ten seconds after starting the learning process. Afterwards, as the reward signal becomes small, and there is further fine-tuning towards the global optimum. The cyclic actor weights continue growing until the twenty second mark, after which they slowly start decreasing again. Interestingly, this corresponds to the first increase in reference signal amplitude, indicating this might be prevent overtraining from occuring. After 60 seconds, two things happen: the learning rate of the cyclic agent is reduced, reducing the oscillations in the weights, and the learning of the collective agent starts. It is also interesting to note that both sets of actor weights converge towards smaller values than their original estimates. This leads to less aggressive policies, even though the cyclic reference signal actually increases in magnitude. On the other hand, the cyclic critic weights slowly grow throughout the episode. Finally, a sharp jump in the collective critic weights can be observed at the 90 second mark, when the reference signal changes from a steady climb to an altitude hold.
 
 \begin{figure}[htb]
     \centering
@@ -53,7 +62,7 @@ In Fig. \ref{fig:training_weights}, the learned parameters of the online estimat
 \subsection{Test phase} \label{ssec:results:test}
 \subsubsection{Acceleration-deceleration}
 % TODO: move legend in figure, add vertical lines  for flight phases
-Fig. \ref{fig:results_acceldecel} shows the results of a successful episode from the proposed acceleration-deceleration test. In the figure, the different flight phases are indicated with numbered dashed vertical lines (NOTE NOT YET DONE). 
+Fig. \ref{fig:results_acceldecel} shows the results of a successful episode from the proposed acceleration-deceleration test. In the figure, the different flight phases are indicated with numbered dashed vertical lines. 
 In phase 1, the helicopter is in hover. Some minor control excitation can be seen in the first second of the episode, as the environment in initialized in a slightly different state from saved agent. 
 
 In phase 2, the helicopter starts accelerating from hover to $u=25\si[per-mode=symbol]{\meter \per \second}$. It can be seen that the actual forward velocity lags behind the commanded value quite significantly. The pitch angle reference is followed sharply in the sharp transient part of this phase, but is slightly above the reference during the second half of this phase. A slight altitude gain is also observed, though this is well within the limits of 15m. As a result of the high collective required for the acceleration, the pedal control saturates, leading to a slight yawing motion around $t = 8 \si{\second}$, which was the limiting factor in the aggressiveness of the manoeuvre. 
@@ -62,13 +71,13 @@ As soon at the required velocity is achieved, phase 3 starts and an aggressive p
 
 Throughout the episode, it can be observed that the reference pitch angle is smoothly tracked. The pitch angle does not reach the required $30\si{\degree}$ in the deceleration phase, as this would have led to large heading deviations due to pedal saturation. The maximum deviations in altitude, lateral track, and heading angle remain well within the performance bounds. 
 
-The acceleration-deceleration did not meet all the desired performance standards of the ADS-33, as it was largely held back by collective-pedal coupling. This is likely a result of deficiencies in the helicopter model, which is rather simple. Similar trends were observed in \cite{VanDerVorst2001}. When compared to real-life test data, the trends of the control inputs were similar but the magnitude of the collective required was significantly smaller. 
+The acceleration-deceleration did not meet all the desired performance standards of the ADS-33, as it was largely held back by collective-pedal coupling. This is likely a result of deficiencies in the helicopter model, which is rather simple. Similar trends were observed in \cite{VanDerVorst1998}. When compared to real-life test data, the trends of the control inputs were similar but the magnitude of the collective required was significantly smaller. 
 
 \begin{figure}[htb]
     \centering
-    \subfloat[Tracking performance, control inputs and angular rates]{\includegraphics[width=0.48\textwidth]{fig/5/test/acdc/tracking.pdf} \label{fig:acdc_tracking}}
+    \subfloat[Tracking performance, control inputs and angular rates]{\includegraphics[width=0.48\textwidth]{fig/5/test/acdc/tracking2.pdf} \label{fig:acdc_tracking}}
     \subfloat[Remaining state variables]{\includegraphics[width=0.48\textwidth]{fig/5/test/acdc/states.pdf} \label{fig:acdc_states}}
-    \caption{Results of a sample run for the acceleration-deceleration test}
+    \caption{Results of a sample episode in the acceleration-deceleration test. Three different phases are indicated: hover, acceleration, and deceleration.}
     \label{fig:results_acceldecel}
 \end{figure}
 
@@ -86,9 +95,9 @@ Phase 4 starts when the engine power reaches its maximum. As the engine power is
 
 \begin{figure}[htb!]
     \centering
-    \subfloat[Tracking performance, control inputs and angular rates]{\includegraphics[width=0.48\textwidth]{fig/5/test/landing/tracking.pdf} \label{fig:land_tracking}}
-    \subfloat[Remaining state variables]{\includegraphics[width=0.48\textwidth]{fig/5/test/landing/states.pdf} \label{fig:land_states}}
-    \caption{Results of a sample run for the landing test}
+    \subfloat[Tracking performance, control inputs and angular rates]{\includegraphics[width=0.48\textwidth]{fig/5/test/landing/tracking2.pdf} \label{fig:land_tracking}}
+    \subfloat[Remaining state variables]{\includegraphics[width=0.48\textwidth]{fig/5/test/landing/states2.pdf} \label{fig:land_states}}
+    \caption{Results of a sample episode in the one-engine inoperative landing test. Four different phases are indicated: steady descent, engine failure, flare, and rotor deceleration.}
     \label{fig:results_landing}
 \end{figure}
 
